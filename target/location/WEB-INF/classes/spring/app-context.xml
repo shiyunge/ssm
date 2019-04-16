@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:task="http://www.springframework.org/schema/task"
+       default-lazy-init="false"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-4.2.xsd">
+
+    <!--属性文件-->
+    <import resource="classpath*:/spring/properties.xml"/>
+    <!--扫描-->
+    <context:component-scan base-package="com.fable">
+    </context:component-scan>
+
+    <bean id="springContextUtil" class="com.fable.dataReceiver.util.SpringContextUtil"/>
+
+    <!--数据源配置-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${mysql.jdbc.driverClassName}"/>
+        <property name="url" value="${mysql.jdbc.url}"/>
+        <property name="username" value="${mysql.jdbc.username}"/>
+        <property name="password" value="${mysql.jdbc.password}"/>
+        <property name="initialSize" value="${mysql.jdbc.initialSize}"/>
+        <property name="maxActive" value="${mysql.jdbc.maxActive}"/>
+        <property name="maxWait" value="${mysql.jdbc.maxWait}"/>
+        <property name="minIdle" value="${mysql.jdbc.minIdle}"/>
+    </bean>
+
+    <!-- redis连接池配置 -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <!-- 最大连接数 -->
+        <property name="maxTotal" value="30"/>
+        <!-- 最大空闲连接数 -->
+        <property name="maxIdle" value="10"/>
+        <!-- 每次释放连接的最大数目 -->
+        <property name="numTestsPerEvictionRun" value="1024"/>
+        <!-- 释放连接的扫描间隔（毫秒） -->
+        <property name="timeBetweenEvictionRunsMillis" value="30000"/>
+        <!-- 连接最小空闲时间 -->
+        <property name="minEvictableIdleTimeMillis" value="1800000"/>
+        <!-- 连接空闲多久后释放, 当空闲时间>该值 且 空闲连接>最大空闲连接数 时直接释放 -->
+        <property name="softMinEvictableIdleTimeMillis" value="10000"/>
+        <!-- 获取连接时的最大等待毫秒数,小于零:阻塞不确定的时间,默认-1 -->
+        <property name="maxWaitMillis" value="1500"/>
+        <!-- 在获取连接的时候检查有效性, 默认false -->
+        <property name="testOnBorrow" value="true"/>
+        <!-- 在空闲时检查有效性, 默认false -->
+        <property name="testWhileIdle" value="true"/>
+        <!-- 连接耗尽时是否阻塞, false报异常,ture阻塞直到超时, 默认true -->
+        <property name="blockWhenExhausted" value="false"/>
+    </bean>
+
+    <!-- jedis客户端单机版 -->
+    <bean id="redisClient" class="redis.clients.jedis.JedisPool">
+        <constructor-arg name="host" value="127.0.0.1"></constructor-arg>
+        <constructor-arg name="port" value="6379"></constructor-arg>
+        <constructor-arg name="poolConfig" ref="jedisPoolConfig"></constructor-arg>
+    </bean>
+
+    <bean id="jedisClient" class="com.fable.dataReceiver.Redis.JedisClientSingle"/>
+
+    <!-- jedis集群版配置 -->
+    <!-- <bean id="redisClient" class="redis.clients.jedis.JedisCluster">
+        <constructor-arg name="nodes">
+            <set>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7001"></constructor-arg>
+                </bean>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7002"></constructor-arg>
+                </bean>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7003"></constructor-arg>
+                </bean>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7004"></constructor-arg>
+                </bean>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7005"></constructor-arg>
+                </bean>
+                <bean class="redis.clients.jedis.HostAndPort">
+                    <constructor-arg name="host" value="192.168.25.153"></constructor-arg>
+                    <constructor-arg name="port" value="7006"></constructor-arg>
+                </bean>
+            </set>
+        </constructor-arg>
+        <constructor-arg name="poolConfig" ref="jedisPoolConfig"></constructor-arg>
+    </bean>
+    <bean id="jedisClientCluster" class="com.taotao.rest.dao.impl.JedisClientCluster"></bean> -->
+
+    <!--扫描Mapper接口-->
+    <bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.fable.**.mapper"/>
+        <property name="properties">
+            <value>
+                wrapKeyword=`{0}`
+            </value>
+        </property>
+    </bean>
+
+    <!--配置会话管理-->
+    <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis/mybatis-config.xml"/>
+        <property name="mapperLocations">
+            <list>
+                <value>classpath*:com/fable/**/${database.type}/*Mapper.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--事务管理器-->
+    <bean id="txManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+    <!--声明式事务配置-->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="is*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="get*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="search*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="query*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="select*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="find*" read-only="true" propagation="NOT_SUPPORTED"/>
+            <tx:method name="add*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="insert*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="save*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="edit*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="modify*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="del*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="batch*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="remove*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="grant*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+            <tx:method name="revoke*" read-only="false" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <!--事务切入点配置-->
+    <aop:config>
+        <aop:pointcut id="operation" expression="execution(* com.fable.**.service.impl.*.*(..))"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="operation"/>
+    </aop:config>
+
+    <!--任务配置-->
+    <task:executor id="executor" pool-size="5"/>
+    <task:scheduler id="scheduler" pool-size="10"/>
+    <task:annotation-driven executor="executor" scheduler="scheduler"/>
+
+</beans>

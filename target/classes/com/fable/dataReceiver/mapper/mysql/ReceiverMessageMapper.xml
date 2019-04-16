@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fable.dataReceiver.mapper.ReceiverMessageMapper">
+    <resultMap id="BaseResultMap" type="com.fable.dataReceiver.bean.po.ReceiveMessagePO">
+        <id column="id" property="id" jdbcType="CHAR"/>
+        <result column="device_id" property="deviceId" jdbcType="CHAR"/>
+        <result column="message_id" property="messageId" jdbcType="CHAR"/>
+        <result column="meg_seq" property="megSeq" jdbcType="VARCHAR"/>
+        <result column="message_length" property="messageLength" jdbcType="CHAR"/>
+        <result column="signal_strengths" property="signalStrengths" jdbcType="CHAR"/>
+        <result column="report_interval" property="reportInterval" jdbcType="VARCHAR"/>
+        <result column="move_status" property="moveStatus" jdbcType="CHAR"/>
+        <result column="button_alarm" property="buttonAlarm" jdbcType="CHAR"/>
+        <result column="device_battery" property="deviceBattery" jdbcType="VARCHAR"/>
+        <result column="location_mode" property="locationMode" jdbcType="CHAR"/>
+        <result column="location_status" property="locationStatus" jdbcType="CHAR"/>
+        <result column="location_time" property="locationTime" jdbcType="VARCHAR"/>
+        <result column="config_enabled" property="configEnabled" jdbcType="CHAR"/>
+        <result column="position_timeout" property="positionTimeout" jdbcType="VARCHAR"/>
+        <result column="check_code" property="checkCode" jdbcType="VARCHAR"/>
+        <result column="config_interval" property="configInterval" jdbcType="VARCHAR"/>
+        <result column="bat_lng" property="batLng" jdbcType="DOUBLE"/>
+        <result column="bat_lat" property="batLat" jdbcType="DOUBLE"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <select id="getByImei" parameterType="string" resultType="com.fable.dataReceiver.bean.po.ReceiveMessagePO">
+        SELECT
+        *
+        FROM
+        lm_message
+        WHERE device_id = #{imei}
+        order by create_time desc
+        limit 1
+    </select>
+
+
+    <select id="selectByParams" resultMap="BaseResultMap" parameterType="java.util.HashMap">
+        select
+        *
+        from lm_message
+        <where>
+            <if test="imei != null and imei!=''">
+                and device_id = #{imei}
+            </if>
+            <if test="status != null and status!=''">
+                and status = #{status}
+            </if>
+            <if test="beginTime != null and beginTime != ''">
+                and <![CDATA[create_time >= #{beginTime}]]>
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and <![CDATA[create_time <= #{endTime}]]>
+            </if>
+        </where>
+        order by create_time asc
+    </select>
+</mapper>

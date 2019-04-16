@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!--<setting name="logImpl" value="STDOUT_LOGGING"/>-->
+        <!-- 使全局的映射器启用或禁用缓存。 -->
+        <setting name="cacheEnabled" value="false"/>
+        <!-- 是否允许单条sql 返回多个数据集  (取决于驱动的兼容性) default:true -->
+        <setting name="multipleResultSetsEnabled" value="true"/>
+        <!-- 是否可以使用列的别名 (取决于驱动的兼容性) default:true -->
+        <setting name="useColumnLabel" value="true"/>
+        <!-- 这是默认的执行类型  （SIMPLE: 简单； REUSE: 执行器可能重复使用prepared statements语句；BATCH: 执行器可以重复执行语句和批量更新）  -->
+        <setting name="defaultExecutorType" value="SIMPLE"/>
+        <!-- 使用驼峰命名法转换字段。 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+
+        <setting name="callSettersOnNulls" value="true"/>
+    </settings>
+    <plugins>
+        <!-- 分页查询插件 -->
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <property name="helperDialect" value="mysql"/>
+            <property name="reasonable" value="true"/>
+        </plugin>
+    </plugins>
+</configuration>
