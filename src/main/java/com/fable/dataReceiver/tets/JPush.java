@@ -13,7 +13,7 @@ import cn.jpush.api.push.model.notification.Notification;
 import org.testng.annotations.Test;
 
 /**
- * 测试极光推送信息
+ * 测试极光推送信息  需要在官网的Api上下载相应的客户端测试  可以设置RegId 和 别名 和所有用户进行别名推送
  */
 public class JPush {
 
