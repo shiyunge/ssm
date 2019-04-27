@@ -9,6 +9,7 @@ import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -85,6 +86,37 @@ public class ContentServiceImpl implements ContentService {
             return record;
         }
     }
+
+public static void main(String[]args){
+
+User user = new User();
+    user.setName("数");
+    System.out.println(obj2Map(user));
+    System.out.println(obj2Map(user).get("name"));
+
+}
+
+    private static Map<String, String> obj2Map(Object obj) {
+        Map<String, String> map = new HashMap<String, String>();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            String varName = fields[i].getName();
+            varName = varName.toLowerCase();
+            boolean accessFlag = fields[i].isAccessible();
+            fields[i].setAccessible(true);
+            try {
+                Object object = fields[i].get(obj);
+                if (object != null)
+                    map.put(varName, object.toString());
+
+                fields[i].setAccessible(accessFlag);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+        return map;
+    }
+
 
 
 }
