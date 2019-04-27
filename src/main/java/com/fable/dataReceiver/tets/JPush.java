@@ -33,7 +33,7 @@ public class JPush {
     public void pushAline() {
         PushPayload payload = PushPayload.newBuilder()
                 .setPlatform(Platform.android())//推送平台
-                .setAudience(Audience.registrationId("13065ffa4e47f3aacb1"))//推送目标
+                .setAudience(Audience.alias("Syg"))//推送目标
                 .setNotification(Notification.newBuilder().addPlatformNotification(AndroidNotification.newBuilder().
                         setAlert(alert).setTitle(title).build()).build())//通知消息（标题，内容）
                 .setOptions(Options.newBuilder().setApnsProduction(true).setTimeToLive(86400).build()//离线消息保存时间
